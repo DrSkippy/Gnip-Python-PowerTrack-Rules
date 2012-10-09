@@ -1,5 +1,7 @@
 *.py[co]
 
+rules.cfg
+
 # Packages
 *.egg
 *.egg-info
