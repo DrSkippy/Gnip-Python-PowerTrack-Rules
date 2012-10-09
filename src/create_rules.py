@@ -39,11 +39,11 @@ else:
     r.initLocalRules()
     for row in sys.stdin:
         # rule \t tag
-        rt = row.split("\t")
+        rt = row.split('\t')
         if len(rt) == 2:
-            r.appendLocalRule(rt[0], rt[1])
+            r.appendLocalRule(rt[0], rt[1].strip())
         elif len(rt) == 1:
-            r.appendLocalRule(rt[0])
+            r.appendLocalRule(rt[0].strip())
         else:
             pass
 r.createGnipRules()

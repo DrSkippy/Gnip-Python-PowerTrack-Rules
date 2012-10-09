@@ -16,23 +16,37 @@ Options:
   -h, --help          show this help message and exit
   -u URL, --url=URL   Input url
   -p, --pretty-print  Prettier printing of output.
+
+> ./list_rules.py 
+{"rules": [{"tag": "musician", "value": "bieber"}, {"tag": "musician", "value": "gaga "}, {"tag": "candidate", "value": "obama"}, {"tag": "candidate", "value": "romney "}, {"tag": null, "value": "dog"}, {"tag": null, "value": "cat -mouse -mice -rat"}]}
+
 > ./list_rules.py -p
-{'rules': [{u'tag': None, u'value': u'bieber\n'},
-           {u'tag': None, u'value': u'gaga\n'},
-           {u'tag': None, u'value': u'obama\n'},
-           {u'tag': None, u'value': u'romney\n'},
-           {u'tag': None, u'value': u'dog\n'},
-           {u'tag': None, u'value': u'cat -mouse -mice -rat\n'}]}
+{'rules': [{u'tag': u'musician', u'value': u'bieber'},
+           {u'tag': u'musician', u'value': u'gaga '},
+           {u'tag': u'candidate', u'value': u'obama'},
+           {u'tag': u'candidate', u'value': u'romney '},
+           {u'tag': None, u'value': u'dog'},
+           {u'tag': None, u'value': u'cat -mouse -mice -rat'}]}
+
 > ./delete_all_rules.py 
 OK - 6 rules deleted,
-> ./list_rules.py 
-{"rules": []}
-Scott-Hendricksons-MacBook-Pro ~/IdeaProjects/Gnip-Python-PowerTrack-Rules/src> cat powertrack.rules | ./create_rules.py 
+
+> ./create_rules.py -h
+Usage: create_rules.py [options]
+
+Options:
+  -h, --help          show this help message and exit
+  -u URL, --url=URL   Input url
+  -j, --json          Interpret input stream is JSON rules
+  -d, --delete-rules  Delete existing rules before creating new.
+
+> cat powertrack.rules | ./create_rules.py 
 OK - 6 rules created,
+
 > ./list_rules.py 
-{"rules": [{"tag": null, "value": "bieber\n"}, {"tag": null, "value": "gaga\n"}, {"tag": null, "value": "obama\n"}, {"tag": null, "value": "romney\n"}, {"tag": null, "value": "dog\n"}, {"tag": null, "value": "cat -mouse -mice -rat\n"}]}
+{"rules": [{"tag": "musician", "value": "bieber"}, {"tag": "musician", "value": "gaga "}, {"tag": "candidate", "value": "obama"}, {"tag": "candidate", "value": "romney "}, {"tag": null, "value": "dog"}, {"tag": null, "value": "cat -mouse -mice -rat"}]}
 Scott-Hendricksons-MacBook-Pro ~/IdeaProjects/Gnip-Python-PowerTrack-Rules/src> cat powertrack.json | ./create_rules.py -dj
-OK - 6 rules created
+OK - 6 rules created,
 
 ==
 Gnip-Python-PowerTrack-Rule by Scott Hendrickson is licensed under a Creative Commons Attribution-ShareAlike 3.0 Unported License. This work is licensed under the Creative Commons Attribution-ShareAlike 3.0 Unported License. To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/3.0/.
