@@ -9,27 +9,66 @@ url.
 EXAMPLES:
 =========
 
-> ./list_rules.py -h
+$ ./list_rules.py -h
 Usage: list_rules.py [options]
 
 Options:
-  -h, --help          show this help message and exit
-  -u URL, --url=URL   Input url
-  -p, --pretty-print  Prettier printing of output.
+  -h, --help            show this help message and exit
+  -u URL, --url=URL     Input url
+  -p, --pretty-print    Prettier printing of output.
+  -m PATTERN, --match-pattern=PATTERN
+                        List only rules matching pattern (Python REs)
+  -t, --match-tag       Match tag as well as rules (use with -m)
 
 > ./list_rules.py 
 {"rules": [{"tag": "musician", "value": "bieber"}, {"tag": "musician", "value": "gaga "}, {"tag": "candidate", "value": "obama"}, {"tag": "candidate", "value": "romney "}, {"tag": null, "value": "dog"}, {"tag": null, "value": "cat -mouse -mice -rat"}]}
 
-> ./list_rules.py -p
-{'rules': [{u'tag': u'musician', u'value': u'bieber'},
-           {u'tag': u'musician', u'value': u'gaga '},
-           {u'tag': u'candidate', u'value': u'obama'},
-           {u'tag': u'candidate', u'value': u'romney '},
-           {u'tag': None, u'value': u'dog'},
-           {u'tag': None, u'value': u'cat -mouse -mice -rat'}]}
 
-> ./delete_all_rules.py 
-OK - 6 rules deleted,
+$ ./list_rules.py -p
+{
+   "rules": [
+      {
+         "tag": null, 
+         "value": "obama"
+      }, 
+      {
+         "tag": null, 
+         "value": "romney"
+      }, 
+      {
+         "tag": "musician", 
+         "value": "bieber"
+      }, 
+      {
+         "tag": "musician", 
+         "value": "gaga "
+      }, 
+      {
+         "tag": null, 
+         "value": "dog"
+      }, 
+      {
+         "tag": null, 
+         "value": "cat -mouse -mice -rat"
+      }
+   ]
+}
+
+$ ./delete_rules.py -h
+Usage: delete_rules.py [options]
+
+Options:
+  -h, --help            show this help message and exit
+  -u URL, --url=URL     Input url
+  -m PATTERN, --match-pattern=PATTERN
+                        List only rules matching pattern (Python REs)
+  -t, --match-tag       Match tag as well as rules (use with -m)
+  -d, --delete          Set this flag to delete, with -d, prospective changes
+                        are shown but not executed.
+
+$ ./delete_rules.py 
+=== proposed rule deletions shown but not executed ===
+{"rules": [{"tag": null, "value": "obama"}, {"tag": null, "value": "romney"}, {"tag": "musician", "value": "bieber"}, {"tag": "musician", "value": "gaga "}, {"tag": null, "value": "dog"}, {"tag": null, "value": "cat -mouse -mice -rat"}]}
 
 > ./create_rules.py -h
 Usage: create_rules.py [options]
@@ -43,9 +82,7 @@ Options:
 > cat powertrack.rules | ./create_rules.py 
 OK - 6 rules created,
 
-> ./list_rules.py 
-{"rules": [{"tag": "musician", "value": "bieber"}, {"tag": "musician", "value": "gaga "}, {"tag": "candidate", "value": "obama"}, {"tag": "candidate", "value": "romney "}, {"tag": null, "value": "dog"}, {"tag": null, "value": "cat -mouse -mice -rat"}]}
-Scott-Hendricksons-MacBook-Pro ~/IdeaProjects/Gnip-Python-PowerTrack-Rules/src> cat powertrack.json | ./create_rules.py -dj
+> cat powertrack.json | ./create_rules.py -dj
 OK - 6 rules created,
 
 ==
