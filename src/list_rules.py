@@ -2,7 +2,7 @@
 from gnip_rules import GnipRules
 from optparse import OptionParser
 from ConfigParser import ConfigParser
-from pprint import pprint
+import json
 
 config = ConfigParser()
 config.read('./rules.cfg')
@@ -30,6 +30,6 @@ if options.pattern is not None:
     r.getRulesLike(options.pattern, matchTag=options.matchTag)
 
 if options.pretty:
-    pprint(r.getRules())
+    print(json.dumps(r.getRules(), indent=3))
 else:
     print r

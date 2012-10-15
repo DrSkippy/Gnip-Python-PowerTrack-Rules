@@ -133,7 +133,7 @@ class GnipRules(object):
         res = []
         ruleMatch = re.compile(findKey, re.IGNORECASE)
         for r in self.rulesList:
-            if matchTag and "tag" in r:
+            if matchTag and "tag" in r and r["tag"] is not None:
                 if ruleMatch.search(r["tag"]):
                     res.append(r)
                     continue
@@ -149,7 +149,7 @@ class GnipRules(object):
     def __repr__(self):
         res = ''
         if not self.clean:
-            res = "===LOCAL===\n"
+            res = "===SHOWING LOCAL RULES -- May NOT RELECT SERVER STATUS===\n"
         return res + json.dumps(self.getRules(), encoding="utf-8")
 
 if __name__ == '__main__':

@@ -1,8 +1,8 @@
 #!/usr/bin/env python
-#!/usr/bin/env python
 from gnip_rules import GnipRules
 from optparse import OptionParser
 from ConfigParser import ConfigParser
+import sys
 
 config = ConfigParser()
 config.read('./rules.cfg')
@@ -32,10 +32,10 @@ if options.pattern is not None:
     g.getRulesLike(options.pattern, matchTag=options.matchTag)
 
 if options.delete:
-    print "=== deleteing rules ==="
+    print >>sys.stderr, "=== deleteing rules ==="
     g.deleteGnipRules()
     print g.getResponse()
 else:
-    print "=== proposed rule deletions shown but not executed ==="
-    print g.getRules()
+    print >>sys.stderr, "=== proposed rule deletions shown but not executed ==="
+    print g
 
