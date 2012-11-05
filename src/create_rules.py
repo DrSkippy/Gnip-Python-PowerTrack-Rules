@@ -15,7 +15,7 @@ parser = OptionParser()
 parser.add_option("-u", "--url", dest="url", default=None,
 				help="Input url")
 parser.add_option("-j", "--json", dest="json", default=False, action="store_true",
-				help="Interpret input stream is JSON rules")
+				help="Interpret input stream as JSON rules")
 parser.add_option("-d", "--delete-rules", dest="delete", default=False, action="store_true",
 				help="Delete existing rules before creating new.")
 (options, args) = parser.parse_args()

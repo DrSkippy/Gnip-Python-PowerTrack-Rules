@@ -18,7 +18,7 @@ parser.add_option("-m", "--match-pattern", dest="pattern", default=None,
 parser.add_option("-t", "--match-tag", dest="matchTag", default=False, action="store_true",
             help="Match tag as well as rules (use with -m)")
 parser.add_option("-d", "--delete", dest="delete", default=False, action="store_true",
-                    help="Set this flag to delete, with -d, prospective changes are shown but not executed.")
+                    help="Set this flag to delete, without -d, prospective changes are shown but not executed.")
 (options, args) = parser.parse_args()
 
 if options.url is not None:
