@@ -36,6 +36,6 @@ if options.delete:
     g.deleteGnipRules()
     print g.getResponse()
 else:
-    print >>sys.stderr, "=== proposed rule deletions shown but not executed ==="
+    print >>sys.stderr, "=== proposed rule deletions shown but not executed, use -d to execute ==="
     print g
 

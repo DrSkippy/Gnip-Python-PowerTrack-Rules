@@ -4,7 +4,7 @@ Gnip-Python-PowerTrack-Rules
 Gnip PowerTrack rules management library and utilities in python
 
 Edit the sample_config.cfg file with your credentials and your favorite stream rule management
-url.
+url. Copy or move to rules.cfg
 
 EXAMPLES:
 =========
