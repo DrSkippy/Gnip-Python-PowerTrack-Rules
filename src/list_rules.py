@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from gnip_rules import GnipRules
+from gnip_rules.gnip_rules import *
 from optparse import OptionParser
 import sys
 import json
