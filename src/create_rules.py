@@ -1,15 +1,9 @@
 #!/usr/bin/env python
 from gnip_rules import GnipRules
+from gnip_config import *
 from optparse import OptionParser
-from ConfigParser import ConfigParser
 import sys
 import json
-
-config = ConfigParser()
-config.read('./rules.cfg')
-un = config.get('creds', 'un')
-pwd = config.get('creds', 'pwd')
-defaultUrl = config.get('defaults','url')
 
 parser = OptionParser()
 parser.add_option("-u", "--url", dest="url", default=None,
@@ -25,7 +19,7 @@ if options.url is not None:
 elif defaultUrl is not None:
     r = GnipRules(un, pwd, defaultUrl)
 else:
-    print "No url provided."
+    print "No url provided. Add [defaults] url=... to config file or use -u ..."
     sys.exit()
 
 if options.delete:

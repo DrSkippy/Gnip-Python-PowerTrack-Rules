@@ -1,6 +1,7 @@
 *.py[co]
 
-rules.cfg
+.gnip
+gnip.cfg
 
 # Packages
 *.egg

@@ -1,10 +1,16 @@
 Gnip-Python-PowerTrack-Rules
 ============================
 
-Gnip PowerTrack rules management library and utilities in python
+Gnip PowerTrack rules management library and utilities.
 
 Edit the sample_config.cfg file with your credentials and your favorite stream rule management
-url. Copy or move to rules.cfg
+url. Copy or move to .gnip.
+
+Utilities will check the local directory for .gnip. If you want to use a different location
+try:
+
+export GNIP_CONFIG_FILE=... in your environment.
+
 
 EXAMPLES:
 =========
@@ -18,7 +24,9 @@ Options:
   -p, --pretty-print    Prettier printing of output.
   -m PATTERN, --match-pattern=PATTERN
                         List only rules matching pattern (Python REs)
-  -t, --match-tag       Match tag as well as rules (use with -m)
+  -t MATCHTAG, --match-tag=MATCHTAG
+                        List only rules with tags matching pattern (Python
+                        REs)
 
 > ./list_rules.py 
 {"rules": [{"tag": "musician", "value": "bieber"}, {"tag": "musician", "value": "gaga "}, {"tag": "candidate", "value": "obama"}, {"tag": "candidate", "value": "romney "}, {"tag": null, "value": "dog"}, {"tag": null, "value": "cat -mouse -mice -rat"}]}
@@ -60,14 +68,17 @@ Usage: delete_rules.py [options]
 Options:
   -h, --help            show this help message and exit
   -u URL, --url=URL     Input url
-  -m PATTERN, --match-pattern=PATTERN
+  -m PATTERN, --match-rule=PATTERN
                         List only rules matching pattern (Python REs)
-  -t, --match-tag       Match tag as well as rules (use with -m)
-  -d, --delete          Set this flag to delete, with -d, prospective changes
-                        are shown but not executed.
+  -t MATCHTAG, --match-tag=MATCHTAG
+                        List only rules with tags matching pattern (Python
+                        REs)
+  -d, --delete          Set this flag to delete, without -d, prospective
+                        changes are shown but not executed.
+
 
 $ ./delete_rules.py 
-=== proposed rule deletions shown but not executed ===
+=== Proposed rule deletions shown but not executed ===
 {"rules": [{"tag": null, "value": "obama"}, {"tag": null, "value": "romney"}, {"tag": "musician", "value": "bieber"}, {"tag": "musician", "value": "gaga "}, {"tag": null, "value": "dog"}, {"tag": null, "value": "cat -mouse -mice -rat"}]}
 
 > ./create_rules.py -h
@@ -80,10 +91,10 @@ Options:
   -d, --delete-rules  Delete existing rules before creating new.
 
 > cat powertrack.rules | ./create_rules.py 
-OK - 6 rules created,
+OK - 6 rules created
 
 > cat powertrack.json | ./create_rules.py -dj
-OK - 6 rules created,
+OK - 6 rules created
 
 ==
 Gnip-Python-PowerTrack-Rule by Scott Hendrickson is licensed under a Creative Commons Attribution-ShareAlike 3.0 Unported License. This work is licensed under the Creative Commons Attribution-ShareAlike 3.0 Unported License. To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/3.0/.

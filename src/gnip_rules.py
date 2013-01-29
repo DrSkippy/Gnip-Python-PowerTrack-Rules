@@ -119,25 +119,31 @@ class GnipRules(object):
         except urllib2.URLError:
             self.setResponse("Delete rules failed, check url and credentials.", STATUS_ERR)
 
-    def isRule(self, findKey):
+    def isRule(self, comp_rule):
         if not self.clean:
             self.listGnipRules()
         for r in self.rulesList:
-            if r["value"] == findKey.lower():
+            if r["value"] == comp_rule:
                 return True
         return False
 
-    def getRulesLike(self, findKey, matchTag=False):
+    def getRulesLike(self, rule_match_text=None, tag_match_text=None):
         if not self.clean:
             self.listGnipRules()
         res = []
-        ruleMatch = re.compile(findKey, re.IGNORECASE)
+        if rule_match_text is not None:
+            ruleRE = re.compile(rule_match_text, re.IGNORECASE)
+        if tag_match_text is not None:
+            tagRE = re.compile(tag_match_text, re.IGNORECASE)
         for r in self.rulesList:
-            if matchTag and "tag" in r and r["tag"] is not None:
-                if ruleMatch.search(r["tag"]):
-                    res.append(r)
-                    continue
-            if ruleMatch.search(r["value"]):
+            matched = False
+            if tag_match_text is not None and "tag" in r and r["tag"] is not None:
+                if tagRE.search(r["tag"]):
+                    matched = True
+            if rule_match_text is not None and "value" in r:
+                if ruleRE.search(r["value"]):
+                    matched = True
+            if matched:        
                 res.append(r)
         self.rulesList = res
         self.clean = False

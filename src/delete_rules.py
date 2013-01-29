@@ -1,22 +1,16 @@
 #!/usr/bin/env python
 from gnip_rules import GnipRules
 from optparse import OptionParser
-from ConfigParser import ConfigParser
 import sys
-
-config = ConfigParser()
-config.read('./rules.cfg')
-un = config.get('creds', 'un')
-pwd = config.get('creds', 'pwd')
-defaultUrl = config.get('defaults','url')
+from gnip_config import *
 
 parser = OptionParser()
 parser.add_option("-u", "--url", dest="url", default=None,
                         help="Input url")
-parser.add_option("-m", "--match-pattern", dest="pattern", default=None, 
+parser.add_option("-m", "--match-rule", dest="pattern", default=None, 
             help="List only rules matching pattern (Python REs)")
-parser.add_option("-t", "--match-tag", dest="matchTag", default=False, action="store_true",
-            help="Match tag as well as rules (use with -m)")
+parser.add_option("-t", "--match-tag", dest="matchTag", default=None, 
+            help="List only rules with tags matching pattern (Python REs)")
 parser.add_option("-d", "--delete", dest="delete", default=False, action="store_true",
                     help="Set this flag to delete, without -d, prospective changes are shown but not executed.")
 (options, args) = parser.parse_args()
@@ -26,16 +20,17 @@ if options.url is not None:
 elif defaultUrl is not None:
     g = GnipRules(un, pwd, defaultUrl)
 else:
-    print "No url provided."
+    print "No url provided. Add [defaults] url=... to config file or use -u ..."
+    sys.exit()
 
 if options.pattern is not None:
-    g.getRulesLike(options.pattern, matchTag=options.matchTag)
+    g.getRulesLike(options.pattern, options.matchTag)
 
 if options.delete:
-    print >>sys.stderr, "=== deleteing rules ==="
+    print >>sys.stderr, "=== Deleteing rules ==="
     g.deleteGnipRules()
     print g.getResponse()
 else:
-    print >>sys.stderr, "=== proposed rule deletions shown but not executed, use -d to execute ==="
+    print >>sys.stderr, "=== Proposed rule deletions shown but not executed, use -d to execute ==="
     print g
 
