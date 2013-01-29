@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 from gnip_rules.gnip_rules import *
+from gnip_rules.gnip_config import *
 from optparse import OptionParser
 import sys
 import json
-from gnip_config import *
 
 parser = OptionParser()
 parser.add_option("-u", "--url", dest="url", default=None,

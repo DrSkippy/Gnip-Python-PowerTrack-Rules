@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-from gnip_rules import *
-from gnip_config import *
+from gnip_rules.gnip_rules import *
+from gnip_rules.gnip_config import *
 from optparse import OptionParser
 import sys
 import json

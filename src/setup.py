@@ -2,7 +2,7 @@ from distutils.core import setup
 
 setup(
     name='gnip-powertrack-rules',
-    version='0.1.0',
+    version='0.1.1',
     author='Scott Hendrickson',
     author_email='scott@drskippy.net',
     packages=['gnip_rules'],
