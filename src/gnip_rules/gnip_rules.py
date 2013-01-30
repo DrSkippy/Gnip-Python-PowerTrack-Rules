@@ -88,7 +88,7 @@ class GnipRules(object):
     
 
     def createGnipRules(self):
-        if self.clean:
+        if self.clean or self.rulesList == []:
             self.setResponse("No new rules to create.", STATUS_ERR)
         else:
             self.clean = False
@@ -115,7 +115,6 @@ class GnipRules(object):
                 response = urllib2.urlopen(req)
                 res += response.read()
             self.setResponse('%d rules deleted, %s'%(self.size(), res))
-            self.initLocalRules()
         except urllib2.URLError:
             self.setResponse("Delete rules failed, check url and credentials.", STATUS_ERR)
 
@@ -126,6 +125,29 @@ class GnipRules(object):
             if r["value"] == comp_rule:
                 return True
         return False
+
+    def updateRule(self, current_rule, updated_rule, tag=None):
+        if not self.clean:
+            self.listGnipRules()
+        if self.isRule(current_rule):
+            # Install new rule first so no break in stream
+            self.initLocalRules()
+            self.appendLocalRule(updated_rule, tag=tag)
+            self.createGnipRules()
+            if self.getStatus():
+                # Delete old rule second
+                self.initLocalRules()
+                self.appendLocalRule(current_rule)
+                self.deleteGnipRules()
+                self.setResponse("Successfully updated %s to %s."%(current_rule, updated_rule))
+            else:
+                self.initLocalRules()
+                self.appendLocalRule(updated_rule, tag=tag)
+                self.deleteGnipRules()
+                self.setResponse("Unable to install new rule, no changes made.", STATUS_ERR)
+        else:
+            self.setResponse("Original rule not found, please check rule and try again.", STATUS_ERR)
+            
 
     def getRulesLike(self, rule_match_text=None, tag_match_text=None):
         if not self.clean:

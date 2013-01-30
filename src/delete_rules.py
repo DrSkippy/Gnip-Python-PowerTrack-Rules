@@ -23,7 +23,7 @@ else:
     print "No url provided. Add [defaults] url=... to config file or use -u ..."
     sys.exit()
 
-if options.pattern is not None:
+if options.pattern is not None or options.matchTag is not None:
     g.getRulesLike(options.pattern, options.matchTag)
 
 if options.delete:

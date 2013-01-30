@@ -19,7 +19,7 @@ if options.url is not None:
 elif defaultUrl is not None:
     r = GnipRules(un, pwd, defaultUrl)
 else:
-    print "No url provided. Add [defaults] url=... to config file or use -u ..."
+    print >>sys.stderr, "No url provided. Add [defaults] url=... to config file or use -u ..."
     sys.exit()
 
 if options.delete:
