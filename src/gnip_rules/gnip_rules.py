@@ -149,7 +149,7 @@ class GnipRules(object):
             self.setResponse("Original rule not found, please check rule and try again.", STATUS_ERR)
             
 
-    def getRulesLike(self, rule_match_text=None, tag_match_text=None):
+    def getRulesLike(self, rule_match_text=None, tag_match_text=None, req_exact=True):
         if not self.clean:
             self.listGnipRules()
         res = []
@@ -159,14 +159,25 @@ class GnipRules(object):
             tagRE = re.compile(tag_match_text, re.IGNORECASE)
         for r in self.rulesList:
             matched = False
+            exact = False
             if tag_match_text is not None and "tag" in r and r["tag"] is not None:
-                if tagRE.search(r["tag"]):
+                tmp =  tagRE.search(r["tag"])
+                if tmp:
                     matched = True
+                    if tmp.group(0) == r["tag"]:
+                        exact = True
             if rule_match_text is not None and "value" in r:
-                if ruleRE.search(r["value"]):
+                tmp =  ruleRE.search(r["value"])
+                if tmp:
                     matched = True
-            if matched:        
-                res.append(r)
+                    if tmp.group(0) == r["value"]:
+                        exact = True
+            if matched:
+                if req_exact:
+                    if exact:
+                        res.append(r)
+                else:
+                    res.append(r)
         self.rulesList = res
         self.clean = False
         return self.getRules()

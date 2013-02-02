@@ -1,9 +1,16 @@
 #!/usr/bin/env python
+# -*- coding: UTF-8 -*-
 from gnip_rules.gnip_rules import *
 from gnip_rules.gnip_config import *
 from optparse import OptionParser
+import fileinput
 import sys
 import json
+import codecs
+# unicode
+reload(sys)
+sys.stdout = codecs.getwriter('utf-8')(sys.stdout)
+
 
 parser = OptionParser()
 parser.add_option("-u", "--url", dest="url", default=None,
@@ -26,12 +33,12 @@ if options.delete:
     r.deleteGnipRules()
 
 if options.json:
-    buf = sys.stdin.read()
+    buf = ''.join([x for x in fileinput.FileInput(args,openhook=fileinput.hook_compressed)])
     r.initLocalRules()
     r.rulesList = json.loads(buf)["rules"]
 else:
     r.initLocalRules()
-    for row in sys.stdin:
+    for row in fileinput.FileInput(args,openhook=fileinput.hook_compressed):
         # rule \t tag
         rt = row.split('\t')
         if len(rt) == 2:
