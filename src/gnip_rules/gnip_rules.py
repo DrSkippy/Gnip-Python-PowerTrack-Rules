@@ -7,6 +7,7 @@ import json
 import sys
 import re
 import codecs
+import time
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -15,6 +16,7 @@ sys.stdout = codecs.getwriter('utf-8')(sys.stdout)
 STATUS_OK = "OK"
 STATUS_ERR = "Error"
 RULE_LIMIT = 5000
+RULE_LEN_LIMIT = 1024
 
 class RequestWithMethod(urllib2.Request):
     def __init__(self, url, method, data=None, headers={}):
@@ -71,7 +73,7 @@ class GnipRules(object):
                 val = x["value"]
             if field is not None:
                 if "tag" not in x or x["tag"] is None:
-                    tag = "%s%s"%(delim, field)
+                    tag = "%s"%(field)
                 else:
                     tag = x["tag"] + "%s%s"%(delim, field)
             else:
@@ -90,13 +92,23 @@ class GnipRules(object):
 
     def ruleLimitRange(self):
         # Generates sublists of total rule list that comply with Gnip's
-        # maximum rule update number
+        # maximum rule update limit per request
         for j in range(0, self.size(), RULE_LIMIT):
             if j == self.size() - 1:
                 upper = self.size() % RULE_LIMIT
             else:
                 upper = RULE_LIMIT 
             yield { "rules": self.rulesList[j:j + upper] }
+
+    def ruleLengthCheck(self):
+        valid = True
+        cnt = 0
+        for r in self.ruleList:
+            cnt += 1
+            if len(r["value"]) > RULE_LEN_LIMIT:
+                valid = False
+                print >>sys.stderr,"Rule (%4d): %s"%r["value"]
+        return valid
 
     def listGnipRules(self):
         # When not clean, read rules for Gnip server
@@ -125,13 +137,17 @@ class GnipRules(object):
         else:
             self.clean = False
             res = ''
+            cnt = 0
             try:
                 for rs in self.ruleLimitRange():
+                    cnt += 1
                     req = RequestWithMethod(self.url, 'POST', data=json.dumps(rs))
                     req.add_header('Content-type', 'application/json')
                     req.add_header("Authorization", "Basic %s" % self.base64string)  
                     response = urllib2.urlopen(req)
                     res += response.read()
+                    if cnt%5 == 0:
+                        time.sleep(5) # no more than 5 per 5 seconds
                 self.setResponse("%d rules created, %s"%(self.size(),res))
             except urllib2.URLError:
                 self.setResponse("Create rules failed, check url and credentials.", STATUS_ERR)
@@ -140,13 +156,17 @@ class GnipRules(object):
         # delete rules in local rule set from Gnip server
         self.clean = False
         res = ''
+        cnt = 0
         try:
             for rs in self.ruleLimitRange():
+                cnt += 1
                 req = RequestWithMethod(self.url, 'DELETE', data=json.dumps(rs))
                 req.add_header('Content-type', 'application/json')
                 req.add_header("Authorization", "Basic %s" % self.base64string)
                 response = urllib2.urlopen(req)
                 res += response.read()
+                if cnt%5 == 0:
+                    time.sleep(5) # no more than 5 per 5 seconds
             self.setResponse('%d rules deleted, %s'%(self.size(), res))
         except urllib2.URLError:
             self.setResponse("Delete rules failed, check url and credentials.", STATUS_ERR)
