@@ -11,14 +11,19 @@ import codecs
 reload(sys)
 sys.stdout = codecs.getwriter('utf-8')(sys.stdout)
 
-
 parser = OptionParser()
 parser.add_option("-u", "--url", dest="url", default=None,
-				help="Input url")
+    help="Input url")
 parser.add_option("-j", "--json", dest="json", default=False, action="store_true",
-				help="Interpret input stream as JSON rules")
+	help="Interpret input stream as JSON rules")
 parser.add_option("-d", "--delete-rules", dest="delete", default=False, action="store_true",
-				help="Delete existing rules before creating new.")
+	help="Delete existing rules before creating new.")
+parser.add_option("-a", "--append-clause", dest="post", default=None,
+    help="Add this rule clause to every rule on creation (e.g. profanity negation rules or operators)")
+parser.add_option("-b", "--append-tag-field", dest="post_tag", default=None,
+    help="Add this field to every tag creation (e.g. project name, version or date)")
+parser.add_option("-t", "--tag-field-delimiter", dest="tag_delimiter", default=":",
+        help="Tag field delimiter (default is :)")
 (options, args) = parser.parse_args()
 
 if options.url is not None:
@@ -47,5 +52,9 @@ else:
             r.appendLocalRule(rt[0].strip())
         else:
             pass
+
+if options.post is not None or options.post_tag is not None:
+    r.appendClauseToRules(options.post, options.post_tag, options.tag_delimiter)
+
 r.createGnipRules()
 print r.getResponse()

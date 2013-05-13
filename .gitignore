@@ -2,6 +2,7 @@
 
 .gnip
 gnip.cfg
+rules.cfg
 
 # Packages
 *.egg
