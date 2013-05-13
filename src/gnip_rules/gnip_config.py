@@ -10,4 +10,3 @@ config.read(config_file_name)
 un = config.get('creds', 'un')
 pwd = config.get('creds', 'pwd')
 defaultUrl = config.get('defaults','url')
-

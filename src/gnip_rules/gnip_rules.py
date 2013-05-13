@@ -49,18 +49,48 @@ class GnipRules(object):
         self.responseString = ' - '.join([str(status), x.strip()])
 
     def initLocalRules(self):
+        # creates a clean start for building records structure
         self.rulesList = []
         self.clean = False
     
     def getRules(self):
+        # wraps a list of rules with dictionary structure as required
+        # by Gnip's rules API
         return { "rules": self.rulesList }
 
+    def appendClauseToRules(self, clause=None, field=None, delim = ":"):
+        # append clause to every rule in the current local list
+        # append field to every tag in teh current local list using delimiter
+        # does not check for clean status, to allow appending to sub-set
+        # of rules when combined with match
+        res = []
+        for x in self.rulesList:
+            if clause is not None:
+                val = x["value"] + " %s"%clause
+            else:
+                val = x["value"]
+            if field is not None:
+                if "tag" not in x or x["tag"] is None:
+                    tag = "%s%s"%(delim, field)
+                else:
+                    tag = x["tag"] + "%s%s"%(delim, field)
+            else:
+                if "tag" not in x or x["tag"] is None:
+                    tag = None
+                else:
+                    tag = x["tag"]
+            res.append({"value":val, "tag":tag})
+            self.rulesList = res
+
     def appendLocalRule(self, rule, tag=None):
+        # Add a rule to the local list of rules
         tmp = {"value": rule, "tag": tag}
         self.rulesList.append(tmp)
         self.clean = False
 
-    def ruleRange(self):
+    def ruleLimitRange(self):
+        # Generates sublists of total rule list that comply with Gnip's
+        # maximum rule update number
         for j in range(0, self.size(), RULE_LIMIT):
             if j == self.size() - 1:
                 upper = self.size() % RULE_LIMIT
@@ -69,10 +99,12 @@ class GnipRules(object):
             yield { "rules": self.rulesList[j:j + upper] }
 
     def listGnipRules(self):
+        # When not clean, read rules for Gnip server
         if not self.clean:
             req = RequestWithMethod(self.url, 'GET')
             req.add_header('Content-type', 'application/json')
             req.add_header("Authorization", "Basic %s" % self.base64string)
+            self.clean = False
             try:
                 response = urllib2.urlopen(req)
                 rules = json.loads(response.read(), encoding="utf-8")
@@ -80,7 +112,6 @@ class GnipRules(object):
                 self.setResponse('%d rules returned'%self.size(), STATUS_OK)
                 self.clean = True
             except urllib2.URLError:
-                self.clean = False
                 self.setResponse("List rules failed, check url and credentials.", STATUS_ERR)
         else:
             self.responseString = "OK"
@@ -88,13 +119,14 @@ class GnipRules(object):
     
 
     def createGnipRules(self):
+        # create rules in local ruls set on the Gnip server
         if self.clean or self.rulesList == []:
             self.setResponse("No new rules to create.", STATUS_ERR)
         else:
             self.clean = False
             res = ''
             try:
-                for rs in self.ruleRange():
+                for rs in self.ruleLimitRange():
                     req = RequestWithMethod(self.url, 'POST', data=json.dumps(rs))
                     req.add_header('Content-type', 'application/json')
                     req.add_header("Authorization", "Basic %s" % self.base64string)  
@@ -105,10 +137,11 @@ class GnipRules(object):
                 self.setResponse("Create rules failed, check url and credentials.", STATUS_ERR)
 
     def deleteGnipRules(self):
+        # delete rules in local rule set from Gnip server
         self.clean = False
         res = ''
         try:
-            for rs in self.ruleRange():
+            for rs in self.ruleLimitRange():
                 req = RequestWithMethod(self.url, 'DELETE', data=json.dumps(rs))
                 req.add_header('Content-type', 'application/json')
                 req.add_header("Authorization", "Basic %s" % self.base64string)
@@ -119,6 +152,8 @@ class GnipRules(object):
             self.setResponse("Delete rules failed, check url and credentials.", STATUS_ERR)
 
     def isRule(self, comp_rule):
+        # check to see if comparative rule is in the clean local rule set
+        # this is an exact string match
         if not self.clean:
             self.listGnipRules()
         for r in self.rulesList:
@@ -127,6 +162,10 @@ class GnipRules(object):
         return False
 
     def updateRule(self, current_rule, updated_rule, tag=None):
+        # updates are composite actions of:
+        #   verify rule_old 
+        #   add rule_new
+        #   delete rule_old
         if not self.clean:
             self.listGnipRules()
         if self.isRule(current_rule):
@@ -150,6 +189,7 @@ class GnipRules(object):
             
 
     def getRulesLike(self, rule_match_text=None, tag_match_text=None, req_exact=True):
+        # list rules by approximate matches (re or sub text)
         if not self.clean:
             self.listGnipRules()
         res = []
@@ -183,12 +223,13 @@ class GnipRules(object):
         return self.getRules()
 
     def size(self):
+        # how many rules in the local list
         return len(self.rulesList)
 
     def __repr__(self):
         res = ''
         if not self.clean:
-            res = "===SHOWING LOCAL RULES -- May NOT RELECT SERVER STATUS===\n"
+            res = ">>>===SHOWING LOCAL RULES -- May NOT RELECT SERVER STATUS===<<<\n"
         return res + json.dumps(self.getRules(), encoding="utf-8")
 
 if __name__ == '__main__':
