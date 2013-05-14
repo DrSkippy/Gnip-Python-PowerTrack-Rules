@@ -32,7 +32,7 @@ elif options.pattern is not None or options.tagPattern is not None:
     g.getRulesLike(options.pattern, options.tagPattern, req_exact=False)
 
 if options.delete:
-    print >>sys.stderr, "=== Deleteing rules ==="
+    print >>sys.stderr, "=== Deleting rules ==="
     g.deleteGnipRules()
     print g.getResponse()
 else:
