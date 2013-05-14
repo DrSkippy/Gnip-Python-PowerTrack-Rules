@@ -100,14 +100,14 @@ class GnipRules(object):
                 upper = RULE_LIMIT 
             yield { "rules": self.rulesList[j:j + upper] }
 
-    def ruleLengthCheck(self):
+    def validRuleLength(self):
         valid = True
         cnt = 0
-        for r in self.ruleList:
+        for r in self.rulesList:
             cnt += 1
             if len(r["value"]) > RULE_LEN_LIMIT:
                 valid = False
-                print >>sys.stderr,"Rule (%4d): %s"%r["value"]
+                print >>sys.stderr,"Rule (%4d): %s"%(cnt,r["value"])
         return valid
 
     def listGnipRules(self):
@@ -135,6 +135,9 @@ class GnipRules(object):
         if self.clean or self.rulesList == []:
             self.setResponse("No new rules to create.", STATUS_ERR)
         else:
+            if not self.validRuleLength():
+                self.setResponse("One or more rules exceed valid length.", STATUS_ERR)
+                return
             self.clean = False
             res = ''
             cnt = 0
@@ -188,24 +191,38 @@ class GnipRules(object):
         #   delete rule_old
         if not self.clean:
             self.listGnipRules()
-        if self.isRule(current_rule):
-            # Install new rule first so no break in stream
+        if not self.isRule(current_rule):
+            self.setResponse("Original rule not found, please check rule and try again.", STATUS_ERR)
+            return
+        if current_rule == updated_rule and tag is not None:
+            # this is a tag update with the same rule
+            # this is a work-around to the problem of address by rule value
+            # OR with very unlikely string for a split second
+            tr = updated_rule + " OR contains:zzzz9999gggg"
+            if self.gaplessRuleUpdateTransaction(current_rule, tr, tag):
+                self.gaplessRuleUpdateTransaction(tr, updated_rule, tag)
+        else:
+            self.gaplessRuleUpdateTransaction(current_rule, updated_rule, tag)
+
+    def gaplessRuleUpdateTransaction(self, current_rule, updated_rule, tag=None):
+        # Install new rule first so no break in stream
+        self.initLocalRules()
+        self.appendLocalRule(updated_rule, tag=tag)
+        self.createGnipRules()
+        if self.getStatus():
+            # Delete old rule second
+            self.initLocalRules()
+            self.appendLocalRule(current_rule)
+            self.deleteGnipRules()
+            self.setResponse("Successfully updated %s to %s."%(current_rule, updated_rule))
+            return True
+        else:
+            # back it out
             self.initLocalRules()
             self.appendLocalRule(updated_rule, tag=tag)
-            self.createGnipRules()
-            if self.getStatus():
-                # Delete old rule second
-                self.initLocalRules()
-                self.appendLocalRule(current_rule)
-                self.deleteGnipRules()
-                self.setResponse("Successfully updated %s to %s."%(current_rule, updated_rule))
-            else:
-                self.initLocalRules()
-                self.appendLocalRule(updated_rule, tag=tag)
-                self.deleteGnipRules()
-                self.setResponse("Unable to install new rule, no changes made.", STATUS_ERR)
-        else:
-            self.setResponse("Original rule not found, please check rule and try again.", STATUS_ERR)
+            self.deleteGnipRules()
+            self.setResponse("Unable to install new rule, no changes made.", STATUS_ERR)
+            return False
             
 
     def getRulesLike(self, rule_match_text=None, tag_match_text=None, req_exact=True):

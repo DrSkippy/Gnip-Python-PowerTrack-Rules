@@ -47,7 +47,7 @@ else:
         # rule \t tag
         rt = row.split('\t')
         if len(rt) == 2:
-            r.appendLocalRule(rt[0], rt[1].strip())
+            r.appendLocalRule(rt[0].strip(), rt[1].strip())
         elif len(rt) == 1:
             r.appendLocalRule(rt[0].strip())
         else:
