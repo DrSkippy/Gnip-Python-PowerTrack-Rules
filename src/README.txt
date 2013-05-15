@@ -18,133 +18,346 @@ try:
 EXAMPLES:
 =========
 
-$ ./list_rules.py -h
+
+Command line scripts:
+
+    create_rules.py  delete_rules.py  list_rules.py  update_rules.py
+
+Example files:
+    
+    example0.rules  example1.rules  example2_updates.rules  example3.json  example4_updates.rules
+
+Scripts have parameter descriptions that can be viewed with the -h flag.  E.g.,
+
+>>~/Gnip-Python-PowerTrack-Rules/src$ ./list_rules.py -h
 Usage: list_rules.py [options]
 
 Options:
   -h, --help            show this help message and exit
-  -u URL, --url=URL     Input url
+  -u URL, --url=URL     Rules end point url
   -p, --pretty-print    Prettier printing of output.
-  -m PATTERN, --match-pattern=PATTERN
+  -e PATTERN, --regex-match-rule=PATTERN
                         List only rules matching pattern (Python REs)
-  -t MATCHTAG, --match-tag=MATCHTAG
-                        List only rules with tags matching pattern (Python
-                        REs)
+  -x TAGPATTERN, --regex-match-tag=TAGPATTERN
+                        List only rules with tag matching pattern (Python REs)
+  -m RULE, --match-rule=RULE
+                        List only rules matching rule (Exact)
+  -t TAG, --match-tag=TAG
+                        List only rules with tags matching tag (Exact)
   -c, --csv             Csv printing of output (with tab delimiter)
 
+To delete all of your rules:
 
-> ./list_rules.py 
-{"rules": [{"tag": "musician", "value": "bieber"}, {"tag": "musician", "value": "gaga "}, {"tag": "candidate", "value": "obama"}, {"tag": "candidate", "value": "romney "}, {"tag": null, "value": "dog"}, {"tag": null, "value": "cat -mouse -mice -rat"}]}
+>>~/Gnip-Python-PowerTrack-Rules/src$ ./delete_rules.py -d
+=== Deleting rules ===
+OK - 3 rules deleted,
 
+To retrieve rules from the Gnip servers:
 
-$ ./list_rules.py -p
+>>~/Gnip-Python-PowerTrack-Rules/src$ ./list_rules.py 
+{"rules": []}
+
+Let's make some simple rules, first off, with not tags,
+
+>>~/Gnip-Python-PowerTrack-Rules/src$ cat example0.rules 
+bieber lang:ja
+gaga lang:es
+obama
+
+>>~/Gnip-Python-PowerTrack-Rules/src$ ./create_rules.py example0.rules 
+OK - 3 rules created,
+
+>>~/Gnip-Python-PowerTrack-Rules/src$ ./list_rules.py -p
 {
    "rules": [
       {
          "tag": null, 
-         "value": "obama"
+         "value": "bieber lang:ja"
       }, 
       {
          "tag": null, 
-         "value": "romney"
+         "value": "gaga lang:es"
       }, 
+      {
+         "tag": null, 
+         "value": "obama"
+      }
+   ]
+}
+
+Now make some slightly more complicated rules with tags. The rules file uses tabs to
+separate rules and tags:
+
+>>~/Gnip-Python-PowerTrack-Rules/src$ ./create_rules.py -d example1.rules 
+OK - 8 rules created,
+
+>>~/Gnip-Python-PowerTrack-Rules/src$ ./list_rules.py -p
+{
+   "rules": [
       {
          "tag": "musician", 
          "value": "bieber"
       }, 
       {
          "tag": "musician", 
-         "value": "gaga "
+         "value": "gaga"
+      }, 
+      {
+         "tag": "POTUS", 
+         "value": "obama"
+      }, 
+      {
+         "tag": "POTUS", 
+         "value": "taft"
       }, 
       {
          "tag": null, 
+         "value": "dog OR doggy OR dogs"
+      }, 
+      {
+         "tag": "pets", 
+         "value": "canary OR parrot OR parakeet"
+      }, 
+      {
+         "tag": "pets", 
+         "value": "cat OR kitty OR kitten"
+      }, 
+      {
+         "tag": "pets", 
+         "value": "ground OR hog -day"
+      }
+   ]
+}
+
+
+Oops, we don't want ground OR hog--those are pets, we wanted ground (AND) hog.  Also,
+we want to tag the dog rule with "pets" as well.  Here is the update file (columns are
+existing rule(tab)replacement rule(tab)new tag):
+
+>>~/Gnip-Python-PowerTrack-Rules/src$ cat example2_updates.rules 
+dog OR doggy OR dogs    dog OR doggy OR dogs    pets
+ground OR hog -day  ground hog -day pets
+
+>>~/Gnip-Python-PowerTrack-Rules/src$ ./update_rules.py example2_updates.rules 
+OK - Successfully updated dog OR doggy OR dogs OR GNIPNULLRULE to dog OR doggy OR dogs.
+OK - Successfully updated ground OR hog -day to ground hog -day.
+
+>>~/Gnip-Python-PowerTrack-Rules/src$ ./list_rules.py -p
+{
+   "rules": [
+      {
+         "tag": "musician", 
+         "value": "bieber"
+      }, 
+      {
+         "tag": "musician", 
+         "value": "gaga"
+      }, 
+      {
+         "tag": "POTUS", 
+         "value": "obama"
+      }, 
+      {
+         "tag": "POTUS", 
+         "value": "taft"
+      }, 
+      {
+         "tag": "pets", 
+         "value": "canary OR parrot OR parakeet"
+      }, 
+      {
+         "tag": "pets", 
+         "value": "cat OR kitty OR kitten"
+      }, 
+      {
+         "tag": "pets", 
+         "value": "dog OR doggy OR dogs"
+      }, 
+      {
+         "tag": "pets", 
+         "value": "ground hog -day"
+      }
+   ]
+}
+
+Let's use JSON formated rules instead:
+
+>>~/Gnip-Python-PowerTrack-Rules/src$ cat example3.json 
+{"rules": [{"tag": "teen idol", "value": "bieber"}, {"tag": "teen idol", "value": "gaga"}, {"tag": "teen idol:POTUS", "value": "obama"}, {"tag": "candidate", "value": "romney"}, {"tag": "pets", "value": "dog"}, {"tag": "pets", "value": "cat -mouse -mice -rat"}]}
+
+Let's make a new set of rules (and use the -d flag to delete all of the old rules):
+
+>>~/Gnip-Python-PowerTrack-Rules/src$ ./create_rules.py -dj example3.json 
+OK - 6 rules created,
+
+>>~/Gnip-Python-PowerTrack-Rules/src$ ./list_rules.py -p
+{
+   "rules": [
+      {
+         "tag": "teen idol", 
+         "value": "bieber"
+      }, 
+      {
+         "tag": "teen idol", 
+         "value": "gaga"
+      }, 
+      {
+         "tag": "teen idol:POTUS", 
+         "value": "obama"
+      }, 
+      {
+         "tag": "candidate", 
+         "value": "romney"
+      }, 
+      {
+         "tag": "pets", 
          "value": "dog"
       }, 
       {
-         "tag": null, 
+         "tag": "pets", 
          "value": "cat -mouse -mice -rat"
       }
    ]
 }
 
-$ ./delete_rules.py -h
+This time, create the same new rule set (deleting the old with -d) and append a
+universal negation clause to every rule on creation.  In this case, we want to remove
+activities with the term "hate":
+
+>>~/Gnip-Python-PowerTrack-Rules/src$ ./create_rules.py -dj example3.json -a"-hate"
+OK - 6 rules created,
+
+>>~/Gnip-Python-PowerTrack-Rules/src$ ./list_rules.py -p
+{
+   "rules": [
+      {
+         "tag": "teen idol", 
+         "value": "bieber -hate"
+      }, 
+      {
+         "tag": "teen idol", 
+         "value": "gaga -hate"
+      }, 
+      {
+         "tag": "teen idol:POTUS", 
+         "value": "obama -hate"
+      }, 
+      {
+         "tag": "candidate", 
+         "value": "romney -hate"
+      }, 
+      {
+         "tag": "pets", 
+         "value": "dog -hate"
+      }, 
+      {
+         "tag": "pets", 
+         "value": "cat -mouse -mice -rat -hate"
+      }
+   ]
+}
+
+Now do it with version number "V1" and the creation date appended to the tags:
+
+>>~/Gnip-Python-PowerTrack-Rules/src$ ./create_rules.py -dj example3.json -a"-hate" -b"V1:$(date +%Y-%m-%d)"
+OK - 6 rules created,
+
+>>~/Gnip-Python-PowerTrack-Rules/src$ ./list_rules.py -p
+{
+   "rules": [
+      {
+         "tag": "teen idol:V1:2013-05-15", 
+         "value": "bieber -hate"
+      }, 
+      {
+         "tag": "teen idol:V1:2013-05-15", 
+         "value": "gaga -hate"
+      }, 
+      {
+         "tag": "teen idol:POTUS:V1:2013-05-15", 
+         "value": "obama -hate"
+      }, 
+      {
+         "tag": "candidate:V1:2013-05-15", 
+         "value": "romney -hate"
+      }, 
+      {
+         "tag": "pets:V1:2013-05-15", 
+         "value": "dog -hate"
+      }, 
+      {
+         "tag": "pets:V1:2013-05-15", 
+         "value": "cat -mouse -mice -rat -hate"
+      }
+   ]
+}
+
+We can also delete rules selected by partial match of the rule or tag:
+
+>>~/Gnip-Python-PowerTrack-Rules/src$ ./delete_rules.py -h
 Usage: delete_rules.py [options]
 
 Options:
   -h, --help            show this help message and exit
   -u URL, --url=URL     Input url
-  -m PATTERN, --match-rule=PATTERN
+  -e PATTERN, --regex-match-rule=PATTERN
                         List only rules matching pattern (Python REs)
-  -t MATCHTAG, --match-tag=MATCHTAG
-                        List only rules with tags matching pattern (Python
-                        REs)
+  -x TAGPATTERN, --regex-match-tag=TAGPATTERN
+                        List only rules with tag matching pattern (Python REs)
+  -m RULE, --match-rule=RULE
+                        List only rules matching rule (Exact)
+  -t TAG, --match-tag=TAG
+                        List only rules with tags matching tag (Exact)
   -d, --delete          Set this flag to delete, without -d, prospective
                         changes are shown but not executed.
 
-Warning! this deletes rules from you stream.
+By rule match is too strict unless we type in the whole rule,
 
-$ ./delete_rules.py 
-=== Proposed rule deletions shown but not executed ===
-{"rules": [{"tag": null, "value": "obama"}, {"tag": null, "value": "romney"}, {"tag": "musician", "value": "bieber"}, {"tag": "musician", "value": "gaga "}, {"tag": null, "value": "dog"}, {"tag": null, "value": "cat -mouse -mice -rat"}]}
+>>~/Gnip-Python-PowerTrack-Rules/src$ ./delete_rules.py -tcandidate
+=== Proposed rule deletions shown but not executed, use -d to execute ===
 
-> ./create_rules.py -h
-Usage: create_rules.py [options]
+>>>===SHOWING LOCAL RULES -- May NOT RELECT SERVER STATUS===<<<
+{"rules": []}
 
-Options:
-  -h, --help          show this help message and exit
-  -u URL, --url=URL   Input url
-  -j, --json          Interpret input stream as JSON rules
-  -d, --delete-rules  Delete existing rules before creating new.
+But by regex, we get a match,
 
+>>~/Gnip-Python-PowerTrack-Rules/src$ ./delete_rules.py -xcandidate
+=== Proposed rule deletions shown but not executed, use -d to execute ===
 
-> cat powertrack.rules | ./create_rules.py 
-OK - 6 rules created
+>>>===SHOWING LOCAL RULES -- May NOT RELECT SERVER STATUS===<<<
+{"rules": [{"tag": "candidate:V1:2013-05-15", "value": "romney -hate"}]}
 
-> cat powertrack.json | ./create_rules.py -dj
-OK - 6 rules created
+Add the -d flag to execute the change on the Gnip servers,
 
+>>~/Gnip-Python-PowerTrack-Rules/src$ ./delete_rules.py -dxcandidate
+=== Deleting rules ===
+OK - 1 rules deleted,
 
-Usage: update_rules.py [options]
-
-Options:
-  -h, --help            show this help message and exit
-  -u URL, --url=URL     Input url
-  -r R1, --current-rule=R1
-                        Rule to be replaced.
-  -s R2, --update-rule=R2
-                        Replacement rule.
-  -t T2, --update-tag=T2
-                        Replacement rule tag.
-  -f, --tab-file        Stdin containing list of updates
-                        'rule1<tab>rule2<tab>tab2'
-
-To illustrate the update functionality, use the following sequence. 
-Warning! this deletes rules from you stream.
-
-> ./delete_rules.py -d
-=== Deleteing rules ===
-OK - 5 rules deleted,
-> cat powertrack.json | ./create_rules.py -j
-OK - 6 rules created,
-> ./list_rules.py -c
-bieber	None
-gaga	None
-obama	None
-romney	None
-dog	None
-cat -mouse -mice -rat	None
-> cat powertrack.updates | ./update_rules.py -f
-OK - Successfully updated bieber to biebers.
-OK - Successfully updated gaga to gagas.
-OK - Successfully updated obama to obamas.
-OK - Successfully updated romney to romnies.
-OK - Successfully updated dog to dog.
-> ./list_rules.py -c
-cat -mouse -mice -rat	None
-biebers	musician
-gagas	musician
-obamas	candidate
-romnies	candidate
+>>~/Gnip-Python-PowerTrack-Rules/src$ ./list_rules.py -p
+{
+   "rules": [
+      {
+         "tag": "teen idol:V1:2013-05-15", 
+         "value": "bieber -hate"
+      }, 
+      {
+         "tag": "teen idol:V1:2013-05-15", 
+         "value": "gaga -hate"
+      }, 
+      {
+         "tag": "teen idol:POTUS:V1:2013-05-15", 
+         "value": "obama -hate"
+      }, 
+      {
+         "tag": "pets:V1:2013-05-15", 
+         "value": "dog -hate"
+      }, 
+      {
+         "tag": "pets:V1:2013-05-15", 
+         "value": "cat -mouse -mice -rat -hate"
+      }
+   ]
+}
 
 ==
 Gnip-Python-PowerTrack-Rule by Scott Hendrickson see LICENSE.txt for details.

@@ -198,7 +198,7 @@ class GnipRules(object):
             # this is a tag update with the same rule
             # this is a work-around to the problem of address by rule value
             # OR with very unlikely string for a split second
-            tr = updated_rule + " OR contains:zzzz9999gggg"
+            tr = updated_rule + " OR GNIPNULLRULE"
             if self.gaplessRuleUpdateTransaction(current_rule, tr, tag):
                 self.gaplessRuleUpdateTransaction(tr, updated_rule, tag)
         else:
