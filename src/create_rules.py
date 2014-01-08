@@ -15,7 +15,9 @@ parser = OptionParser()
 parser.add_option("-u", "--url", dest="url", default=None,
     help="Input url")
 parser.add_option("-j", "--json", dest="json", default=False, action="store_true",
-	help="Interpret input stream as JSON rules")
+	help="Interpret input stream as JSON rules (default is 1 text rule per line, tab separated for tags")
+parser.add_option("-o", "--output-only", dest="output_only", default=False, action="store_true",
+	help="Display JSON of rules that would be created with the given input file.")
 parser.add_option("-d", "--delete-rules", dest="delete", default=False, action="store_true",
 	help="Delete existing rules before creating new.")
 parser.add_option("-a", "--append-clause", dest="post", default=None,
@@ -56,5 +58,8 @@ else:
 if options.post is not None or options.post_tag is not None:
     r.appendClauseToRules(options.post, options.post_tag, options.tag_delimiter)
 
-r.createGnipRules()
-print r.getResponse()
+if options.output_only:
+    print r
+else:
+    r.createGnipRules()
+    print r.getResponse()
