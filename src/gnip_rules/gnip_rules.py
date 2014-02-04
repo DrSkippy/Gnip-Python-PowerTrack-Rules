@@ -266,7 +266,9 @@ class GnipRules(object):
     def __repr__(self):
         res = ''
         if not self.clean:
-            res = ">>>===SHOWING LOCAL RULES -- May NOT RELECT SERVER STATUS===<<<\n"
+            # if we're using this to create a json file, don't include this message
+            #res = ">>>===SHOWING LOCAL RULES -- May NOT RELECT SERVER STATUS===<<<\n"
+            print >>sys.stderr, ">>>===SHOWING LOCAL RULES -- May NOT RELECT SERVER STATUS===<<<\n"
         return res + json.dumps(self.getRules(), encoding="utf-8")
 
 if __name__ == '__main__':
